@@ -101,6 +101,16 @@ public class MasterMindUI {
         return roundPanel;
     }
 
+    // Selected color
+    private JLabel createColorDisplayLabel(String text, Color bg, int size) {
+        JLabel label = new JLabel(text, SwingConstants.CENTER);
+        label.setOpaque(true);                       // allow background color
+        label.setBackground(bg);
+        label.setPreferredSize(new Dimension(size, size));
+        return label;
+    }
+
+
     // Create bottom panel (color selection + control buttons)
     private JPanel createBottomPanel(Color[] colors, String[] labels, Color base) {
         JPanel bottomPanel = new JPanel();
@@ -114,7 +124,7 @@ public class MasterMindUI {
         controlPanel.setLayout(new GridLayout(1, 2, 10, 0));
         controlPanel.setPreferredSize(new Dimension(200, 50));
         JButton checkBtn = createStyledButton("Check", base, 50);
-        JButton selected = createStyledButton("Selected", base, 50);
+        JLabel selected = createColorDisplayLabel("Selected", base, 50);
         controlPanel.add(checkBtn);
         controlPanel.add(selected);
 
