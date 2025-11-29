@@ -3,12 +3,20 @@ import javax.swing.*;
 
 public class MasterMindUI {
 
-    // Constants
+    // ----- Constants -----
     private static final int PIN_SIZE = 10;
     private static final int GUESS_SIZE = 35;
+
     private static final Color BG_COLOR = new Color(194, 243, 213);
+    private static final Color BASE_COLOR = new Color(187, 183, 172);
 
     private Color selectedColor = null;
+
+    private java.util.List<Circle[]> guessRows = new java.util.ArrayList<>();
+    private java.util.List<Circle[]> pinRows = new java.util.ArrayList<>();
+    private int currentRow = 0;
+    private MasterMindLogic logic;
+
 
     // Circle class
     private static class Circle extends JButton {
@@ -44,6 +52,7 @@ public class MasterMindUI {
         }
     }
 
+    // ----- Helper functions -----
     // Create styled JButton
     private JButton createStyledButton(String text, Color bg, int size) {
         JButton b = new JButton(text);
@@ -56,41 +65,56 @@ public class MasterMindUI {
     }
 
     // Pin panel
-    private JPanel createPinPanel(Color base) {
+    private JPanel createPinPanel() {
         JPanel pinPanel = new JPanel();
+        Circle[] pinArray = new Circle[4];
+
         pinPanel.setBackground(BG_COLOR);
         pinPanel.setLayout(new GridLayout(2, 2, 5, 5));
 
         for (int j = 0; j < 4; j++) {
-            pinPanel.add(new Circle(base, PIN_SIZE, false));
+            Circle pin = new Circle(BASE_COLOR, PIN_SIZE, false);
+            pinArray[j] = pin;
+            pinPanel.add(pin);
         }
+
+        pinRows.add(pinArray);
+
         return pinPanel;
     }
 
     // Guess panel
-    private JPanel createGuessPanel(Color base) {
+    private JPanel createGuessPanel() {
         JPanel guessPanel = new JPanel();
+        Circle[] guessArray = new Circle[4];
         guessPanel.setBackground(BG_COLOR);
         guessPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
         for (int j = 0; j < 4; j++) {
-            Circle btn = new Circle(base, GUESS_SIZE, true);
+            Circle btn = new Circle(BASE_COLOR, GUESS_SIZE, true);
+            guessArray[j] = btn;
+            int rowIndex = guessRows.size();  // save the row index before adding
             btn.addActionListener(e -> {
-                if (selectedColor != null) btn.setCircleColor(selectedColor);
+                // Only allow coloring the CURRENT row
+                if (rowIndex == currentRow && selectedColor != null) {
+                    btn.setCircleColor(selectedColor);
+                }
             });
+
             guessPanel.add(btn);
         }
+        guessRows.add(guessArray);
         return guessPanel;
     }
 
     // Round row
-    private JPanel createRoundRow(Color base) {
+    private JPanel createRoundRow() {
         JPanel roundPanel = new JPanel();
         roundPanel.setBackground(BG_COLOR);
         roundPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 0));
 
-        roundPanel.add(createPinPanel(base));
-        roundPanel.add(createGuessPanel(base));
+        roundPanel.add(createPinPanel());
+        roundPanel.add(createGuessPanel());
 
         return roundPanel;
     }
@@ -105,7 +129,7 @@ public class MasterMindUI {
     }
 
     // Bottom panel with colors & button
-    private JPanel createBottomPanel(Color[] colors, String[] labels, Color base) {
+    private JPanel createBottomPanel(Color[] colors, String[] labels) {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(BG_COLOR);
         bottomPanel.setLayout(new BorderLayout(10, 0));
@@ -116,8 +140,11 @@ public class MasterMindUI {
         controlPanel.setLayout(new GridLayout(1, 2, 10, 0));
         controlPanel.setPreferredSize(new Dimension(200, 50));
 
-        JButton checkBtn = createStyledButton("Check", base, 50);
-        JLabel selected = createColorDisplayLabel("Selected", base, 50);
+        JButton checkBtn = createStyledButton("Check", BASE_COLOR, 50);
+        checkBtn.addActionListener(e -> {
+            currentRow++;
+        });
+        JLabel selected = createColorDisplayLabel("Selected", BASE_COLOR, 50);
 
         controlPanel.add(checkBtn);
         controlPanel.add(selected);
@@ -129,7 +156,7 @@ public class MasterMindUI {
         for (int i = 0; i < colors.length; i++) {
             JButton btn = createStyledButton(labels[i], colors[i], 50);
             final Color chosen = colors[i];
-
+            // Change the color of selected label
             btn.addActionListener(e -> {
                 selectedColor = chosen;
                 selected.setBackground(selectedColor);
@@ -145,23 +172,22 @@ public class MasterMindUI {
     }
 
     // Main UI
-    public MasterMindUI(Color[] colors, String[] labels, int rounds) {
-        Color base = new Color(187, 183, 172);
-
+    public MasterMindUI(Color[] colors, String[] labels, int rounds, MasterMindLogic logic) {
+        // Main frame
         JFrame frame = new JFrame("MasterMind");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-
+        // Frame with rounds
         JPanel centerPanel = new JPanel();
         centerPanel.setBackground(BG_COLOR);
         centerPanel.setLayout(new GridLayout(rounds, 1, 0, 0));
-
+        // Creating rounds
         for (int i = 0; i < rounds; i++) {
-            centerPanel.add(createRoundRow(base));
+            centerPanel.add(createRoundRow());
         }
-
         frame.add(centerPanel, BorderLayout.CENTER);
-        frame.add(createBottomPanel(colors, labels, base), BorderLayout.SOUTH);
+        // Creating panel with buttons
+        frame.add(createBottomPanel(colors, labels), BorderLayout.SOUTH);
 
         frame.pack();
         frame.setVisible(true);

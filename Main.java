@@ -15,9 +15,14 @@ public class Main {
 
         String[] labels = {"R", "V", "A", "M", "N", "L"};
         int rounds = 10;
+        int secretLength = 4;
 
+        // Create logic
+        MasterMindLogic logic = new MasterMindLogic(palette, rounds, secretLength);
+
+        // Create UI
         SwingUtilities.invokeLater(() -> {
-            new MasterMindUI(palette, labels, rounds);
+            new MasterMindUI(palette, labels, rounds, logic);
         });
     }
 }
