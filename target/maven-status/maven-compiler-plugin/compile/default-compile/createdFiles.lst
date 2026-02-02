@@ -1,5 +1,5 @@
-com\mastermind\Main.class
-com\mastermind\MasterMindUI$Circle.class
-com\mastermind\MasterMindUI.class
-com\mastermind\MasterMindLogic.class
-com\mastermind\MasterMindLogic$Result.class
+com/mastermind/MasterMindUI.class
+com/mastermind/MasterMindLogic.class
+com/mastermind/Main.class
+com/mastermind/MasterMindLogic$Result.class
+com/mastermind/MasterMindUI$Circle.class

@@ -1,20 +1,10 @@
 package com.mastermind;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 public class MasterMindLogicTest {
 
     private final Color[] PALETTE = {Color.RED, Color.GREEN, Color.BLUE,Color.YELLOW};
@@ -25,15 +15,15 @@ public class MasterMindLogicTest {
     // =========================================================================
     @Test
     public void testConstructorYGeneracionAleatoria() {
-        // Aquí NO trucamos nada, queremos ver si el original funciona.
-        int longitud = 4;
-        MasterMindLogic logic = new MasterMindLogic(PALETTE,longitud,LABELS);
+        // ARRANGE (Constructor completo)
+        MasterMindLogic logic = new MasterMindLogic(PALETTE, 4, LABELS);
 
-        // Verificamos que se ha generado un secreto (aunque no sepamos cuál es)
+        // Usar showSecret para sacar el secreto autogenerado
         String secreto = logic.showSecret();
 
-        assertNotNull(secreto,"El secreto no debe ser nulo");
-        assertEquals(longitud, secreto.length(), "El secreto debe tener longitud 4 (son 4 letras)");
+        // Comprobaciones
+        assertNotNull(secreto, "El secreto no puede ser nulo");
+        assertEquals(4, secreto.length(),"El secreto debe tener 4 caracteres de longitud");
     }
 
     // =========================================================================
@@ -41,112 +31,114 @@ public class MasterMindLogicTest {
     // =========================================================================
     @Test
     public void testShowSecret_TraduccionCorrecta() {
-        // ARRANGE (forzamos que el color secreto sea Rojo,Verde
-        MasterMindLogic logic = new MasterMindLogic(PALETTE,2,LABELS) {
-             @Override
-            public Color[] generateSecret(int len) {
-                 return new Color[]{Color.RED, Color.GREEN};
-             }
+        // 1. CONTEXTO (Datos fijos para saber qué esperar)
+        // PALETA: Posición 0 es ROJO (RED), su etiqueta es "R"
+        //         Posición 1 es VERDE (GREEN), su etiqueta es "G"
+
+        // 2. PREPARAR LA MÁQUINA TRUCADA
+        MasterMindLogic logic = new MasterMindLogic(PALETTE, 2,LABELS){
+            @Override
+            public Color[] generateSecret(int secretLength) {
+                // 100% FORZADO ROJO-VERDE
+                return new Color[]{Color.RED,Color.GREEN};
+            }
         };
 
-        // ACT: Pedimos el texto
+        // 3. PEDIR LA TRADUCCIÓN
+        // La función showSecret() recorre los colores del secreto.
+        // 1. Ve Color.RED -> Busca en la paleta -> Es el índice 0 -> Coge etiqueta "R".
+        // 2. Ve Color.GREEN -> Busca en la paleta -> Es el índice 1 -> Coge etiqueta "G".
         String resultado = logic.showSecret();
 
-        // ASSERT: Como Labels son "R","G","B
-        assertEquals("RG",resultado,"Deberia traducir los colores a sus etiquetas");
+        // 4. VERIFICAR
+        assertEquals("RG",resultado, "Debebria traducir Rojo->R y Verde->G");
     }
+
+
     // =========================================================================
     // 3. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: GANAR
     // =========================================================================
     @Test
-    public void testCheckGuess_Ganador_todoNegras() {
-        // ARRANGE: Secreto = ROJO,ROJO,ROJO,ROJO
-        MasterMindLogic logic = new MasterMindLogic(PALETTE,4,LABELS){
+    public void testCheckGuess_Ganador_TodoNegras() {
+        // ARRANGE
+        MasterMindLogic logic = new MasterMindLogic(PALETTE,4,LABELS) {
             @Override
-            public Color[] generateSecret(int len) {
+            public Color[] generateSecret(int secretLength) {
                 return new Color[]{Color.RED,Color.RED,Color.RED,Color.RED};
             }
         };
 
-        // ACT: Jugamos lo mismo
-        Color[] intento = {Color.RED,Color.RED,Color.RED,Color.RED};
-        MasterMindLogic.Result resultado = logic.checkGuess(intento);
+        // ACT
+        Color[] intentoGanador = {Color.RED,Color.RED,Color.RED,Color.RED};
+        MasterMindLogic.Result resultado = logic.checkGuess(intentoGanador);
 
         // ASSERT
-        assertEquals(4,resultado.blacks,"Deben ser 4 negras");
-        assertEquals(0,resultado.whites,"Deben ser 0 blancas");
+        assertEquals(4, resultado.blacks, "Deben haber 4 negras");
+        assertEquals(0, resultado.whites, "Deben haber 0 blancas");
     }
+
 
     // =========================================================================
     // 4. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: TODO BLANCAS
     // =========================================================================
     @Test
     public void testCheckGuess_Desordenado_TodoBlancas() {
-        // ARRANGE: Secreto = ROJO, VERDE
+        // ARRANGE
         MasterMindLogic logic = new MasterMindLogic(PALETTE, 2, LABELS) {
             @Override
-            public Color[] generateSecret(int len) {
-                return new Color[]{Color.RED, Color.GREEN};
+            public Color[] generateSecret(int secretLength) {
+                return new Color[]{Color.RED,Color.BLUE};
             }
         };
-
-        // ACT: Jugamos al revés -> VERDE, ROJO
-        Color[] intento = {Color.GREEN,Color.RED};
-        MasterMindLogic.Result resultado = logic.checkGuess(intento);
+        // ACT
+        Color[] intentoBlancas = {Color.BLUE, Color.RED};
+        MasterMindLogic.Result resultado = logic.checkGuess(intentoBlancas);
 
         // ASSERT
-        assertEquals(0, resultado.blacks, "0 negras (posiciones mal)");
-        assertEquals(2, resultado.whites, "2 blancas (colores bien)");
+        assertEquals(2, resultado.whites, "Deben haber 2 blancas");
+        assertEquals(0, resultado.blacks, "Deben haber 0 negras");
     }
     // =========================================================================
     // 5. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: NINGÚN ACIERTO
     // =========================================================================
     @Test
     void testCheckGuess_FalloTotal() {
-        // ARRANGE: Secreto = ROJO, ROJO
+        // ARRANGE
         MasterMindLogic logic = new MasterMindLogic(PALETTE, 2, LABELS) {
             @Override
-            public Color[] generateSecret(int len) {
+            public Color[] generateSecret (int secretLength) {
                 return new Color[]{Color.RED, Color.RED};
             }
         };
 
-        // ACT: Jugamos AZUL, AZUL
-        Color[] intento = {Color.BLUE, Color.BLUE};
-        MasterMindLogic.Result resultado = logic.checkGuess(intento);
+        // ACT
+        Color[] intentoFallo = {Color.BLUE, Color.BLUE};
+        MasterMindLogic.Result resultado = logic.checkGuess(intentoFallo);
 
         // ASSERT
-        assertEquals(0, resultado.blacks);
-        assertEquals(0, resultado.whites);
+        assertEquals(0,resultado.whites, "Deben haber 0 blancas");
+        assertEquals(0,resultado.blacks, "Deben haber 0 negras");
     }
 
     // =========================================================================
-    // 6. TEST DE LÓGICA COMPLEJA (Repetidos)
+    // 6. TEST DE LÓGICA DE JUEGO (checkGuess Repetidos que sobran)
     // =========================================================================
-    /*
-     Este es el test más importante para tu examen. Verifica que el código
-     no cuente blancas de más cuando hay colores repetidos en el intento
-     pero no en el secreto.
-    */
     @Test
-    void testCheckGuess_RepetidosSobran() {
-        // ARRANGE: Secreto = ROJO, AZUL (Solo hay 1 rojo)
-        MasterMindLogic logic = new MasterMindLogic(PALETTE, 2, LABELS) {
+    public void testCheckGuess_ColoresRepetidos() {
+        // ARRANGE
+        MasterMindLogic logic = new MasterMindLogic(PALETTE, 2,LABELS) {
             @Override
-            public Color[] generateSecret(int len) {
+            public Color[] generateSecret(int secretLength) {
                 return new Color[]{Color.RED, Color.BLUE};
             }
         };
 
-        // ACT: Jugamos ROJO, ROJO (Metemos 2 rojos)
-        Color[] intento = {Color.RED, Color.RED};
-        MasterMindLogic.Result resultado = logic.checkGuess(intento);
+        // ACT
+        Color[] intentoRepetido = {Color.RED, Color.RED};
+        MasterMindLogic.Result resultado = logic.checkGuess(intentoRepetido);
 
         // ASSERT
-        // Posicion 0: ROJO vs ROJO -> Coincide -> 1 NEGRA
-        // Posicion 1: AZUL vs ROJO -> No coincide.
-        // ¿El segundo ROJO es blanca? NO, porque el único rojo del secreto ya se gastó con la negra.
-        assertEquals(1, resultado.blacks, "El primer rojo es acierto exacto");
-        assertEquals(0, resultado.whites, "El segundo rojo no debe contar porque no quedan rojos libres");
+        assertEquals(0,resultado.whites,"Debe haber 0 blancas");
+        assertEquals(1,resultado.blacks, "Debe haber 1 negra");
     }
 }
