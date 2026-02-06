@@ -7,16 +7,25 @@ import java.util.Random;
 
 public class MasterMindLogic {
 
-    private final Color[] SECRET;
+    private Color[] SECRET;
     private final Color[] PALETTE;
     private final String[] LABELS;
 
     // Constructor
     public MasterMindLogic(Color[] palette, int secretLength, String[] labels) {
         this.PALETTE = palette;
-        this.SECRET = generateSecret(secretLength);
+        init(secretLength);
         this.LABELS = labels;
     }
+
+	public void init(int secretLength) {
+		this.SECRET = generateSecret(secretLength);
+	}
+    
+    public MasterMindLogic() {
+    	this.PALETTE = new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
+		this.LABELS = new String[]{"R", "G", "B", "Y"};
+	}
 
     // Secret generator
     public Color[] generateSecret(int secretLength) {
