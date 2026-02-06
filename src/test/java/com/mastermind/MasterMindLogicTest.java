@@ -31,6 +31,7 @@ public class MasterMindLogicTest {
         assertFalse(secreto.isEmpty(), "El secreto no puede estar vacío");
         assertTrue( secreto.contains("R") || secreto.contains("G") || secreto.contains("B") || secreto.contains("Y"));
         assertEquals(4, secreto.length(),"El secreto debe tener 4 caracteres de longitud");
+        assertEquals("RGBY", secreto);
     }
 
     
