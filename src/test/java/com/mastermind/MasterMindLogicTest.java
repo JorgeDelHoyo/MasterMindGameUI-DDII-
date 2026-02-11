@@ -1,6 +1,7 @@
 package com.mastermind;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.awt.*;
@@ -14,16 +15,14 @@ public class MasterMindLogicTest {
 
     private final Color[] PALETTE = {Color.RED, Color.GREEN, Color.BLUE,Color.YELLOW};
     private final String[] LABELS = {"R","G","B","Y"};
-    
-    
+
+
     @Test
     public void testConstructor() {
-        // ARRANGE (Constructor completo)
         MasterMindLogic logic = spy(MasterMindLogic.class) ;
         Mockito.when(logic.generateSecret(4)).thenReturn(PALETTE);
         logic.init(4);
 
-        // Usar showSecret para sacar el secreto autogenerado
         String secreto = logic.showSecret();
 
         // Comprobaciones
@@ -33,9 +32,6 @@ public class MasterMindLogicTest {
         assertEquals(4, secreto.length(),"El secreto debe tener 4 caracteres de longitud");
         assertEquals("RGBY", secreto);
     }
-
-    
-    
 
     // =========================================================================
     // 1. TEST DEL CONSTRUCTOR Y GENERADOR (generateSecret)

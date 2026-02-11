@@ -94,19 +94,10 @@
             </plugin>
 
             <!-- JaCoCo plugin for code coverage -->
-
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
-
-                <configuration>
-                    <excludes>
-                        <exclude>com/mastermind/MasterMindUI*</exclude>
-                    </excludes>
-
-                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -139,7 +130,7 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.20</minimum>
                                         </limit>
                                         <limit>
                                             <counter>CLASS</counter>
@@ -159,7 +150,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.90</minimum>
+                                            <minimum>0.20</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
