@@ -34,11 +34,10 @@ public class MasterMindLogicTest {
     }
 
     // =========================================================================
-    // 1. TEST DEL CONSTRUCTOR Y GENERADOR (generateSecret)
+    // 1. TEST DEL CONSTRUCTOR Y GENERADOR
     // =========================================================================
     @Test
     public void testConstructorYGeneracionAleatoria() {
-        // ARRANGE (Constructor completo)
         MasterMindLogic logic = new MasterMindLogic(PALETTE, 4, LABELS);
 
         // Usar showSecret para sacar el secreto autogenerado
@@ -50,15 +49,10 @@ public class MasterMindLogicTest {
     }
 
     // =========================================================================
-    // 2. TEST DE TRADUCCIÓN (showSecret)
+    // 2. TEST DE TRADUCCIÓN
     // =========================================================================
     @Test
     public void testShowSecret_TraduccionCorrecta() {
-        // 1. CONTEXTO (Datos fijos para saber qué esperar)
-        // PALETA: Posición 0 es ROJO (RED), su etiqueta es "R"
-        //         Posición 1 es VERDE (GREEN), su etiqueta es "G"
-
-        // 2. PREPARAR LA MÁQUINA TRUCADA
         MasterMindLogic logic = new MasterMindLogic(PALETTE, 2,LABELS){
             @Override
             public Color[] generateSecret(int secretLength) {
@@ -67,19 +61,14 @@ public class MasterMindLogicTest {
             }
         };
 
-        // 3. PEDIR LA TRADUCCIÓN
-        // La función showSecret() recorre los colores del secreto.
-        // 1. Ve Color.RED -> Busca en la paleta -> Es el índice 0 -> Coge etiqueta "R".
-        // 2. Ve Color.GREEN -> Busca en la paleta -> Es el índice 1 -> Coge etiqueta "G".
         String resultado = logic.showSecret();
 
-        // 4. VERIFICAR
         assertEquals("RG",resultado, "Debebria traducir Rojo->R y Verde->G");
     }
 
 
     // =========================================================================
-    // 3. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: GANAR
+    // 3. TEST DE LÓGICA DE JUEGO
     // =========================================================================
     @Test
     public void testCheckGuess_Ganador_TodoNegras() {
@@ -102,7 +91,7 @@ public class MasterMindLogicTest {
 
 
     // =========================================================================
-    // 4. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: TODO BLANCAS
+    // 4. TEST DE LÓGICA DE JUEGO
     // =========================================================================
     @Test
     public void testCheckGuess_Desordenado_TodoBlancas() {
@@ -122,7 +111,7 @@ public class MasterMindLogicTest {
         assertEquals(0, resultado.blacks, "Deben haber 0 negras");
     }
     // =========================================================================
-    // 5. TEST DE LÓGICA DE JUEGO (checkGuess) - CASO: NINGÚN ACIERTO
+    // 5. TEST DE LÓGICA DE JUEGO
     // =========================================================================
     @Test
     void testCheckGuess_FalloTotal() {
@@ -144,7 +133,7 @@ public class MasterMindLogicTest {
     }
 
     // =========================================================================
-    // 6. TEST DE LÓGICA DE JUEGO (checkGuess Repetidos que sobran)
+    // 6. TEST DE LÓGICA DE JUEGO
     // =========================================================================
     @Test
     public void testCheckGuess_ColoresRepetidos() {

@@ -34,8 +34,7 @@ public class MasterMindUITest {
     void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        // 1. Mockeamos JOptionPane en el Hilo Principal
-        // Al estar mockeado, las llamadas no bloquearán la ejecución aunque no estemos en un hilo gráfico.
+        // 1. Mock JOptionPane en el Hilo Principal
         mockedJOptionPane = mockStatic(JOptionPane.class);
         mockedJOptionPane.when(() -> JOptionPane.showMessageDialog(any(), any()))
                 .thenAnswer(invocation -> null);
@@ -44,8 +43,7 @@ public class MasterMindUITest {
         String[] labels = {"R", "G", "B", "Y"};
         int rounds = 10;
 
-        // 2. Inicializar UI DIRECTAMENTE (Sin SwingUtilities)
-        // Esto fuerza a que todo se cree y ejecute en el Hilo del Test, donde vive el Mock.
+        // 2. Inicializar UI DIRECTAMENTE
         ui = new MasterMindUI(colors, labels, rounds, logicMock);
 
         // 3. Ocultar la ventana para que no moleste visualmente
@@ -57,7 +55,6 @@ public class MasterMindUITest {
             }
         }
 
-        // 4. REFLECTION: Acceder a listas privadas
         Field guessField = MasterMindUI.class.getDeclaredField("guessRows");
         guessField.setAccessible(true);
         guessRows = (ArrayList<JButton[]>) guessField.get(ui);
@@ -69,7 +66,6 @@ public class MasterMindUITest {
 
     @AfterEach
     public void tearDown() {
-        // Cerrar el mock es obligatorio para no afectar a otros tests
         if (mockedJOptionPane != null) {
             mockedJOptionPane.close();
         }
@@ -79,26 +75,23 @@ public class MasterMindUITest {
     }
 
     // =========================================================================
-    // 1. TEST DE PINTADO (Set/Get Color)
+    // 1. TEST DE PINTADO
     // =========================================================================
     @Test
     public void testPintarCirculoCorrectamente() throws Exception {
         JButton btnRojo = encontrarBotonPorTexto(frame, "R");
         JButton slot = guessRows.get(0)[0];
 
-        // Estado inicial
         assertNotEquals(Color.RED, obtenerColor(slot));
 
-        // ACCIÓN: Click directo (se ejecuta en el main thread)
         btnRojo.doClick(); // Selecciona color
         slot.doClick();    // Pinta círculo
 
-        // VERIFICACIÓN
         assertEquals(Color.RED, obtenerColor(slot), "El círculo debe ser rojo tras el clic");
     }
 
     // =========================================================================
-    // 2. TEST DE VALIDACIONES (No pintar mal)
+    // 2. TEST DE VALIDACIONES
     // =========================================================================
     @Test
     public void testNoPintaEnCondicionesInvalidas() throws Exception {
@@ -118,7 +111,7 @@ public class MasterMindUITest {
     }
 
     // =========================================================================
-    // 3. TEST: FILA INCOMPLETA (Debe mostrar Warning)
+    // 3. TEST: FILA INCOMPLETA
     // =========================================================================
     @Test
     public void testCheckConFilaIncompleta() throws Exception {
@@ -179,7 +172,6 @@ public class MasterMindUITest {
         btnCheck.doClick();
 
         // Verificar mensaje "You lost" y el secreto
-        // Nota: El orden de los mensajes puede variar, buscamos en todos los lanzados.
         verificarMensajeContiene("You lost");
         verificarMensajeContiene("SECRET_XYZ");
     }
@@ -208,7 +200,7 @@ public class MasterMindUITest {
 
 
     // -------------------------------------------------------------------------
-    // HELPERS (Sin SwingUtilities para mantener sincronía de hilos)
+    // HELPERS
     // -------------------------------------------------------------------------
 
     private void rellenarFila(int filaIndex, Color c) throws Exception {
@@ -225,7 +217,6 @@ public class MasterMindUITest {
     // Captura TODOS los mensajes y busca si alguno coincide
     private void verificarMensajeContiene(String textoEsperado) {
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        // Capturamos al menos 1 llamada. Si no hay llamadas, esto fallará aquí.
         mockedJOptionPane.verify(() -> JOptionPane.showMessageDialog(any(), captor.capture()), atLeast(1));
 
         List<Object> todosLosMensajes = captor.getAllValues();
